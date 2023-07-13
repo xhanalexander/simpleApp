@@ -22,7 +22,7 @@ class _ThirdScreenState extends State<ThirdScreen> {
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp)  {
       Provider.of<UserViewModel>(context, listen: false).getUser(
         pages: 1,
-        perPages: 5,
+        perPages: 10,
       );
     });
   }
@@ -44,9 +44,10 @@ class _ThirdScreenState extends State<ThirdScreen> {
         ),
         body: RefreshIndicator(
           onRefresh: () async {
+            Future.delayed(const Duration(seconds: 2));
             await Provider.of<UserViewModel>(context, listen: false).getUser(
               pages: 1,
-              perPages: 10,
+              perPages: 7,
             );
           },
           child: userViews.dataStatus == DataStatus.loading 
@@ -54,81 +55,82 @@ class _ThirdScreenState extends State<ThirdScreen> {
                 child: SpinKitCircle(color: primaryColor, size: 90)
               )
             : userViews.dataStatus == DataStatus.error
-              ? const Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.error_outline, size: 50, color: Colors.grey),
-                      SizedBox(height: 10),
-                      Text('Failed to load data...', style: TextStyle(color: Colors.grey, fontSize: 16)),
-                    ],
-                  ),
-                )
-              : userViews.user.isEmpty
-                ? const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.error_outline, size: 50),
-                        SizedBox(height: 10),
-                        Text('No data found...'),
-                      ],
-                    ),
-                  )
-                : AnimationLimiter(
-                  child: ListView.separated(
-                      separatorBuilder: (context, index) => const Divider(),
-                      shrinkWrap: true,
-                      itemCount: userViews.user.length,
-                      itemBuilder: (context, index) {
-                        return AnimationConfiguration.staggeredGrid(
-                          position: index,
-                          duration: const Duration(milliseconds: 375),
-                          columnCount: 1,
-                          child: SlideAnimation(
-                            horizontalOffset: 150.0,
-                            curve: Curves.easeInOutCubic,
-                            child: ListTile(
-                              onTap: () {
-                                final selectedUser = Provider.of<SelectedUser>(context, listen: false);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('You selected ${userViews.user[index].firstName}'),
-                                    duration: const Duration(milliseconds: 600),
-                                  ),
-                                );
-                                selectedUser.selectedUser(userViews.user[index].firstName!);
-                              },
-                              leading: CircleAvatar(
-                                radius: 25,
-                                backgroundColor: Colors.grey[300],
-                                child: ClipOval(
-                                  child: CachedNetworkImage(
-                                    imageUrl: userViews.user[index].avatar!,
-                                    placeholder: (context, url) => SpinKitCircle(color: Colors.grey[300]!),
-                                    errorWidget: (context, url, error) => const Icon(Icons.error),
-                                  ),
-                                ),
-                              ),
-                              title: Text(
-                                userViews.user[index].firstName!,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold, 
-                                  fontSize: 18
-                                ),
-                              ),
-                              subtitle: Text(
-                                userViews.user[index].email!,
-                                style: const TextStyle( 
-                                  fontSize: 14
-                                ),
-                              ),
+            ? const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.error_outline, size: 50, color: Colors.grey),
+                    SizedBox(height: 10),
+                    Text('Failed to load data...', style: TextStyle(color: Colors.grey, fontSize: 16)),
+                  ],
+                ),
+              )
+            : userViews.user.isEmpty
+            ? const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.error_outline, size: 50),
+                    SizedBox(height: 10),
+                    Text('No data found...'),
+                  ],
+                ),
+              )
+            : AnimationLimiter(
+              child: ListView.separated(
+                separatorBuilder: (context, index) => const Divider(),
+                shrinkWrap: true,
+                itemCount: userViews.user.length,
+                physics: const BouncingScrollPhysics(),
+                itemBuilder: (context, index) {
+                  return AnimationConfiguration.staggeredGrid(
+                    position: index,
+                    duration: const Duration(milliseconds: 375),
+                    columnCount: 1,
+                    child: SlideAnimation(
+                      horizontalOffset: 150.0,
+                      curve: Curves.easeInOutCubic,
+                      child: ListTile(
+                        onTap: () {
+                          final selectedUser = Provider.of<SelectedUser>(context, listen: false);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('You selected ${userViews.user[index].firstName}'),
+                              duration: const Duration(milliseconds: 600),
+                            ),
+                          );
+                          selectedUser.selectedUser(userViews.user[index].firstName!);
+                        },
+                        leading: CircleAvatar(
+                          radius: 25,
+                          backgroundColor: Colors.grey[300],
+                          child: ClipOval(
+                            child: CachedNetworkImage(
+                              imageUrl: userViews.user[index].avatar!,
+                              placeholder: (context, url) => SpinKitCircle(color: Colors.grey[300]!),
+                              errorWidget: (context, url, error) => const Icon(Icons.error),
                             ),
                           ),
-                        );
-                      },
+                        ),
+                        title: Text(
+                          userViews.user[index].firstName!,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold, 
+                            fontSize: 18
+                          ),
+                        ),
+                        subtitle: Text(
+                          userViews.user[index].email!,
+                          style: const TextStyle( 
+                            fontSize: 14
+                          ),
+                        ),
+                      ),
                     ),
-                ),
+                  );
+                },
+              ),
+            ),
         ),
       ),
     );

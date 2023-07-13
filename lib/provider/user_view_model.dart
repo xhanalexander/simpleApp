@@ -34,7 +34,7 @@ class UserViewModel extends ChangeNotifier {
 }
 
 class SelectedUser with ChangeNotifier {
-  String _firstName = 'John Doe';
+  String _firstName = 'Selected User Name';
 
   String get firstName => _firstName;
 
